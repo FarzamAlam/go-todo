@@ -13,7 +13,9 @@ func Respond(w http.ResponseWriter, status int, message interface{}) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
 	w.Write([]byte(response))
+	return
 }
 
 // In case of any error we need to call RespondError

@@ -18,12 +18,21 @@ func main() {
 		log.Fatal("Error while getting the environment variable", err)
 		os.Exit(2)
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	log.Println("Server started :", port)
 	router := mux.NewRouter()
+	// Projects
 	router.HandleFunc("/api/v1/projects", controllers.CreateProject).Methods("POST")
 	router.HandleFunc("/api/v1/projects", controllers.GetAllProject).Methods("GET")
+	router.HandleFunc("/api/v1/projects/{title}", controllers.GetProject).Methods("GET")
+	router.HandleFunc("/api/v1/projects/{title}", controllers.UpdateProject).Methods("PUT")
 
+	// Tasks
 	router.HandleFunc("/api/v1/projects/{title}/tasks", controllers.CreateTask).Methods("POST")
 	router.HandleFunc("/api/v1/projects/{title}/tasks", controllers.GetAllTask).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 
 }
