@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -24,4 +26,44 @@ func (project *Project) AddProject() error {
 		return err
 	}
 	return nil
+}
+
+func GetProject(title string) (*Project, error, bool) {
+	project := &Project{}
+	err := GetDB().First(project, Project{Title: title}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil, false
+		} else {
+			return nil, err, false
+		}
+
+	}
+	return project, nil, true
+}
+
+func (project *Project) UpdateProject() error {
+	err := GetDB().Save(project).Error
+	if err != nil {
+		log.Println("Error in UpdateProject : ", err)
+		return err
+	}
+	return nil
+}
+
+func (project *Project) DeleteProject() error {
+	err := GetDB().Delete(project).Error
+	if err != nil {
+		log.Println("Error in DeleteProject : ", err)
+		return err
+	}
+	return nil
+}
+
+func (project *Project) ArchieveProject() {
+	project.Archieved = true
+}
+
+func (project *Project) RestoreProject() {
+	project.Archieved = false
 }

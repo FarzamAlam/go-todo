@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -24,16 +23,16 @@ func (t *Task) Undo() {
 	t.Done = !t.Done
 }
 
-func GetAllTasks() *[]Task {
+func GetAllTasks(project *Project) (*[]Task, error) {
+
 	tasks := &[]Task{}
-	GetDB().Find(tasks)
-	return tasks
+	err := GetDB().Model(project).Related(tasks).Error
+	return tasks, err
 }
 
 func (task *Task) AddTask() error {
 	err := GetDB().Save(task).Error
 	if err != nil {
-		log.Fatal("Error while adding task : ", err)
 		return err
 	}
 	return nil
