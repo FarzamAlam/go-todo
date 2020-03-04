@@ -12,14 +12,28 @@ import (
 )
 
 var CreateTask = func(w http.ResponseWriter, r *http.Request) {
-	task := &models.Task{}
-	err := json.NewDecoder(r.Body).Decode(task)
+
+	// Get title from the url and get project from using the title.
+	title := mux.Vars(r)["title"]
+	project, err, found := models.GetProject(title)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetProject")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "Error in the request")
+		return
+	}
+	task := models.Task{ProjectID: project.ID}
+	err = json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		utils.RespondError(w, http.StatusBadRequest, "Error in request body.")
+		return
 	}
-	err = task.AddTask()
+	err = (&task).AddTask()
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "Error while adding the task.")
+		return
 	}
 	utils.Respond(w, http.StatusCreated, task)
 }
@@ -32,13 +46,11 @@ var GetAllTask = func(w http.ResponseWriter, r *http.Request) {
 		utils.RespondError(w, http.StatusBadRequest, "Title of the project is empty.")
 	}
 	project, err, found := models.GetProject(projectTitle)
-	log.Println("found : ", found)
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "Error while getting project from title.")
 		return
 	}
 	if !found {
-		log.Println("Inside project not found")
 		utils.RespondError(w, http.StatusBadRequest, "Project not found.")
 		return
 	}
