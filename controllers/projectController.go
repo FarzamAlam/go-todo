@@ -80,5 +80,48 @@ var UpdateProject = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var DeleteProject = func(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+	if title == "" {
+		utils.RespondError(w, http.StatusBadRequest, "Project title is invalid")
+		return
+	}
+	project, err, found := models.GetProject(title)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetProject")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "Project is not found.")
+		return
+	}
+	err = project.DeleteProject()
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in DeleteProject")
+		return
+	}
+	utils.Respond(w, http.StatusAccepted, project)
+}
 
+var ArchieveProject = func(w http.ResponseWriter, r *http.Request) {
+	title := mux.Vars(r)["title"]
+	if title == "" {
+		utils.RespondError(w, http.StatusBadRequest, "Project title is invalid")
+		return
+	}
+	project, err, found := models.GetProject(title)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetProject")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "Project is not found.")
+		return
+	}
+	project.ArchieveProject()
+	err = project.UpdateProject()
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in UpdateProject")
+		return
+	}
+	utils.Respond(w, http.StatusAccepted, project)
 }
