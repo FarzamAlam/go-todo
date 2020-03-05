@@ -61,9 +61,5 @@ func (project *Project) DeleteProject() error {
 }
 
 func (project *Project) ArchieveProject() {
-	project.Archieved = true
-}
-
-func (project *Project) RestoreProject() {
-	project.Archieved = false
+	project.Archieved = !project.Archieved
 }
