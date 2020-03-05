@@ -42,15 +42,6 @@ func GetProject(title string) (*Project, error, bool) {
 	return project, nil, true
 }
 
-func (project *Project) UpdateProject() error {
-	err := GetDB().Save(project).Error
-	if err != nil {
-		log.Println("Error in UpdateProject : ", err)
-		return err
-	}
-	return nil
-}
-
 func (project *Project) DeleteProject() error {
 	err := GetDB().Delete(project).Error
 	if err != nil {

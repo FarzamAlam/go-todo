@@ -59,7 +59,7 @@ func GetTask(title string) (*Task, error, bool) {
 }
 func GetTaskById(id uint) (*Task, error, bool) {
 	task := &Task{}
-	err := GetDB().First(task, Task{ProjectID: id}).Error
+	err := GetDB().First(task, Task{Model: gorm.Model{ID: id}}).Error
 	if err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			return nil, nil, false
