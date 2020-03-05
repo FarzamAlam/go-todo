@@ -34,6 +34,7 @@ var GetAllProject = func(w http.ResponseWriter, r *http.Request) {
 }
 
 var GetProject = func(w http.ResponseWriter, r *http.Request) {
+
 	title := mux.Vars(r)["title"]
 	if title == "" {
 		utils.RespondError(w, http.StatusBadRequest, "Project Title is invalid")
@@ -71,7 +72,7 @@ var UpdateProject = func(w http.ResponseWriter, r *http.Request) {
 		utils.RespondError(w, http.StatusBadRequest, "Error while marhsalling the request body.")
 		return
 	}
-	err = project.UpdateProject()
+	err = project.AddProject()
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "Error while updating the project")
 		return
@@ -118,7 +119,7 @@ var ArchieveProject = func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	project.ArchieveProject()
-	err = project.UpdateProject()
+	err = project.AddProject()
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "Error in UpdateProject")
 		return

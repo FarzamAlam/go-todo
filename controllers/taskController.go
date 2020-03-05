@@ -2,11 +2,12 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/farzamalam/go-todo/utils"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 
 	"github.com/farzamalam/go-todo/models"
 )
@@ -44,6 +45,7 @@ var GetAllTask = func(w http.ResponseWriter, r *http.Request) {
 	projectTitle := params["title"]
 	if projectTitle == "" {
 		utils.RespondError(w, http.StatusBadRequest, "Title of the project is empty.")
+		return
 	}
 	project, err, found := models.GetProject(projectTitle)
 	if err != nil {
@@ -54,11 +56,75 @@ var GetAllTask = func(w http.ResponseWriter, r *http.Request) {
 		utils.RespondError(w, http.StatusBadRequest, "Project not found.")
 		return
 	}
-	log.Println("After the RespondError")
 	tasks, err := models.GetAllTasks(project)
 	if err != nil {
 		utils.RespondError(w, http.StatusInternalServerError, "Error in GetAllTasks.")
 		return
 	}
 	utils.Respond(w, http.StatusOK, tasks)
+}
+
+var GetTaskID = func(w http.ResponseWriter, r *http.Request) {
+	queryParam := r.URL.Query()
+	id, err := strconv.Atoi(queryParam.Get("id"))
+	if err != nil {
+		utils.RespondError(w, http.StatusBadRequest, "Invalid id query param")
+		return
+	}
+	task, err, found := models.GetTaskById(uint(id))
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetTaskById")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "Task is not found")
+		return
+	}
+	utils.Respond(w, http.StatusOK, task)
+}
+
+var GetTaskTitle = func(w http.ResponseWriter, r *http.Request) {
+	queryParam := r.URL.Query()
+	title := queryParam.Get("title")
+	projectTitle := mux.Vars(r)["projectTitle"]
+	if title == "" {
+		utils.RespondError(w, http.StatusBadRequest, "Project Title is invalid")
+		return
+	}
+	_, err, found := models.GetProject(projectTitle)
+
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetProject")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "No project is found with the title")
+		return
+	}
+	task, err, found := models.GetTask(title)
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in GetTask")
+		return
+	}
+	if !found {
+		utils.RespondError(w, http.StatusBadRequest, "Task is not found")
+		return
+	}
+	utils.Respond(w, http.StatusOK, task)
+}
+
+var DeleteTask = func(w http.ResponseWriter, r *http.Request) {
+	queryParam := r.URL.Query()
+	id, err := strconv.Atoi(queryParam.Get("id"))
+	if err != nil {
+		utils.RespondError(w, http.StatusBadRequest, "Error in the query paramter")
+		return
+	}
+	task := &models.Task{Model: gorm.Model{ID: uint(id)}}
+	err = task.DeleteTask()
+	if err != nil {
+		utils.RespondError(w, http.StatusInternalServerError, "Error in DeleteTask")
+		return
+	}
+	utils.Respond(w, http.StatusAccepted, task)
 }
