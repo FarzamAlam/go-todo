@@ -29,10 +29,18 @@ func main() {
 	router.HandleFunc("/api/v1/projects", controllers.GetAllProject).Methods("GET")
 	router.HandleFunc("/api/v1/projects/{title}", controllers.GetProject).Methods("GET")
 	router.HandleFunc("/api/v1/projects/{title}", controllers.UpdateProject).Methods("PUT")
-
+	router.HandleFunc("/api/v1/projects/{title}", controllers.DeleteProject).Methods("DELETE")
+	router.HandleFunc("/api/v1/projects/{title}", controllers.ArchieveProject).Methods("PATCH")
 	// Tasks
 	router.HandleFunc("/api/v1/projects/{title}/tasks", controllers.CreateTask).Methods("POST")
 	router.HandleFunc("/api/v1/projects/{title}/tasks", controllers.GetAllTask).Methods("GET")
+	router.HandleFunc("/api/v1/projects/{projectTitle}/task", controllers.GetTaskID).Queries("id", "{id}").Methods("GET")
+	router.HandleFunc("/api/v1/projects/{projectTitle}/task", controllers.DeleteTask).Queries("id", "{id}").Methods("DELETE")
+	router.HandleFunc("/api/v1/projects/{projectTitle}/task", controllers.CreateTask).Queries("id", "{id}").Methods("PUT")
+	router.HandleFunc("/api/v1/projects/{projectTitle}/task", controllers.GetTaskTitle).Queries("title", "{title}").Methods("GET")
+	// Need to work.
+	router.HandleFunc("/api/v1/projects/{title}/tasks", controllers.CreateTask).Methods("PUT")
+	//router.Path("/api/v1/")
 	log.Fatal(http.ListenAndServe(":"+port, router))
 
 }
