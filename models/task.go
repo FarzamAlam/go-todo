@@ -37,3 +37,34 @@ func (task *Task) AddTask() error {
 	}
 	return nil
 }
+
+func (task *Task) DeleteTask() error {
+	err := GetDB().Delete(task).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func GetTask(title string) (*Task, error, bool) {
+	task := &Task{}
+	err := GetDB().First(task, Task{Title: title}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil, false
+		}
+		return nil, err, false
+
+	}
+	return task, nil, true
+}
+func GetTaskById(id uint) (*Task, error, bool) {
+	task := &Task{}
+	err := GetDB().First(task, Task{ProjectID: id}).Error
+	if err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			return nil, nil, false
+		}
+		return nil, err, false
+	}
+	return task, nil, true
+}
