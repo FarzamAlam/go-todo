@@ -10,9 +10,14 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/joho/godotenv"
+	"github.com/unrolled/secure"
 )
 
 func main() {
+	router := mux.NewRouter()
+
+	router.Use(secureMiddleware.Handler)
+
 	err := godotenv.Load() // Load environment variable.
 	if err != nil {
 		log.Fatal("Error while getting the environment variable", err)
@@ -23,7 +28,6 @@ func main() {
 		port = "8000"
 	}
 	log.Println("Server started :", port)
-	router := mux.NewRouter()
 	// Projects
 	router.HandleFunc("/api/v1/projects", controllers.CreateProject).Methods("POST")
 	router.HandleFunc("/api/v1/projects", controllers.GetAllProject).Methods("GET")
@@ -44,3 +48,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, router))
 
 }
+
+var secureMiddleware = secure.New(secure.Options{
+	FrameDeny:      true,
+	ReferrerPolicy: "same-origin",
+})
